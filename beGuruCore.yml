@@ -1,0 +1,116 @@
+# This is a sample build configuration for JavaScript.
+# Check our guides at https://confluence.atlassian.com/x/14UWN for more examples.
+# Only use spaces to indent your .yml configuration.
+# Instruction for connection to the Plesk is guided in https://www.youtube.com/watch?v=8HZhHtZebdw
+# -----
+# detect the changes in the git (condition) -- https://unix.stackexchange.com/questions/155046/determine-if-git-working-directory-is-clean-from-a-script
+# You can specify a custom docker image from Docker Hub as your build environment.
+image: node:10.15.0
+
+pipelines:
+  # default:
+  #   - step:
+  #       name: Build and test
+  #       script:
+  #         - npm install
+  #         - npm test
+  branches:
+    development:
+        - step:
+            caches:
+                 - node
+            script: # Modify the commands below to build your repository. 
+                     - npm install -g
+                     - npm install -g @angular/cli
+
+                     - git branch
+
+                     - cd public
+                     - npm install
+                     - ng build --prod # --build-optimizer --progress=false
+                     - cd ..         
+
+                     - apt-get update
+                     - apt-get -qq install git-ftp
+
+                     - if [ -z "$(git status --porcelain)" ]; then
+                     - echo 'change not detected'
+                     - else
+                     - git add .
+                     - git commit -m "reset"
+                     - git push origin development
+                     - echo 'change detected' exit 1 ; fi
+                     - git ftp push  --user $DEVELOPMENT_FTP_USERNAME --passwd $DEVELOPMENT_FTP_PASSWORD $DEVELOPMENT_FTP_HOST$DEVELOPMENT_FTP_HOST_DIRECTORY
+
+                     - ls -ltr
+                     - pwd
+    production:
+        - step:
+            caches:
+                 - node
+            script: # Modify the commands below to build your repository. 
+                     - npm install -g
+                     - npm install -g @angular/cli
+
+                     - cd public
+                     - npm install
+                     - ng build --prod # --build-optimizer --progress=false
+                     - cd ..         
+
+                     - apt-get update
+                     - apt-get -qq install git-ftp
+
+                     - if [ -z "$(git status --porcelain)" ]; then
+                     - echo 'change not detected'
+                     - else
+                     - git add .
+                     - git commit -m "reset"
+                     - git push origin production
+                     - echo 'change detected' exit 1 ; fi
+                     - git ftp push  --user $PRODUCTION_FTP_USERNAME --passwd $PRODUCTION_FTP_PASSWORD $PROCUTION_FTP_HOST$PRODUCTION_FTP_HOST_DIRECTORY
+
+                     - ls -ltr
+                     - pwd
+                # git add . && git commit -m "changein the yml && git pull origin feature/RA-8-setup-pipeline-for-this-repo-includ && git push origin feature/RA-8-setup-pipeline-for-this-repo-includ
+                #  - git status
+                #  - git add .
+                #  - git commit -m "new push"
+                #  - git push origin feature/RA-8-setup-pipeline-for-this-repo-includ
+
+
+                #  - apt-get update
+                #  - apt-get -qq install git-ftp
+                #  - git ftp push --user $FTP_USERNAME --passwd $FTP_PASSWORD $FTP_HOST$FTP_HOST_DIRECTORY
+                #  - cat api/includes/delta_server/employee.php
+                #  - git submodule init
+                #  - git submodule update
+                #  - cd beGuru
+
+                #  - cd public
+                #  - npm install
+                #  - ng build --prod # --build-optimizer --progress=false
+                #  - cd ..                
+                #  - git status
+                #  - git add .
+                #  - git commit -m "new push"
+                #  - git ftp push  --user $FTP_USERNAME --passwd $FTP_PASSWORD $FTP_HOST$FTP_HOST_DIRECTORY
+                #  - cd ..
+
+                #  - something_changed = `git diff-index --exit-code --ignore-submodules HEAD`
+                #  - if [ -n "$something_changed" ]
+                #   then
+                #       echo >&2 "Something changed in $local_ref, not pushing"
+                #       exit 1
+                #   fi
+
+                #  - LAST_COMMIT=$(git rev-parse HEAD)
+                #  - git ftp push --commit $LAST_COMMIT --user $FTP_USERNAME --passwd $FTP_PASSWORD $FTP_HOST$FTP_HOST_DIRECTORY
+
+
+                #  - apt-get update
+                #  - apt-get install ncftp
+                #  - ncftpput -v -u "$FTP_USERNAME" -p "$FTP_PASSWORD" -R ftp://37.48.67.130/secure.roto-art.nl/test_folder
+                #  - ls -ltr
+                #  - pwd
+
+
